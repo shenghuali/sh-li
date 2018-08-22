@@ -247,6 +247,9 @@ module.exports = {
                                     ],
                                 },
                             },
+                            {
+                                loader: require.resolve('sass-loader'),
+                            },
                         ],
                     },
                     // "file" loader makes sure those assets get served by WebpackDevServer.
