@@ -11,6 +11,8 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
+const px2viewport = require('postcss-plugin-pxtoviewport')
+const myConfig = require('./config')
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -165,9 +167,24 @@ module.exports = {
                                 options: {
                                     importLoaders: 1,
                                     ident: 'postcss',
-
-
+                                    plugins: () => [
+                                        require('post-css-flexbugs-fixes'),
+                                        autoprefixer({
+                                            browsers: [
+                                                '>1%',
+                                                'last 4 versions',
+                                                'Firefox ESR',
+                                                'not ie < 9', // React doesn't support IE8 anyway
+                                            ],
+                                            flexbox: 'no-2009',
+                                        }),
+                                        px2viewport({
+                                            viewportWidth: myConfig.width,
+                                            toRem: true
+                                        })
+                                    ]
                                 },
+
                             },
                             {
                                 loader: require.resolve('postcss-loader'),
@@ -186,6 +203,47 @@ module.exports = {
                                             ],
                                             flexbox: 'no-2009',
                                         }),
+                                        px2viewport({
+                                            viewportWidth: myConfig.width,
+                                            toRem: true
+                                        })
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        test:/\.scss$/,
+                        use: [
+                            require.resolve('style-loader'),
+                            {
+                                loader: require.resolve('css-loader'),
+                                options: {
+                                    importLoaders: 1,
+                                },
+
+                            },
+                            {
+                                loader: require.resolve('postcss-loader'),
+                                options: {
+                                    // Necessary for external CSS imports to work
+                                    // https://github.com/facebookincubator/create-react-app/issues/2677
+                                    ident: 'postcss',
+                                    plugins: () => [
+                                        require('postcss-flexbugs-fixes'),
+                                        autoprefixer({
+                                            browsers: [
+                                                '>1%',
+                                                'last 4 versions',
+                                                'Firefox ESR',
+                                                'not ie < 9', // React doesn't support IE8 anyway
+                                            ],
+                                            flexbox: 'no-2009',
+                                        }),
+                                        px2viewport({
+                                            viewportWidth: myConfig.width,
+                                            toRem: true
+                                        })
                                     ],
                                 },
                             },
@@ -201,7 +259,7 @@ module.exports = {
                         // its runtime that would otherwise processed through "file" loader.
                         // Also exclude `html` and `json` extensions so they get processed
                         // by webpacks internal loaders.
-                        exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
+                        exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/,/\.scss$/],
                         loader: require.resolve('file-loader'),
                         options: {
                             name: 'static/media/[name].[hash:8].[ext]',
@@ -209,8 +267,8 @@ module.exports = {
                     },
                 ],
             },
-            // ** STOP ** Are you adding a new loader?
-            // Make sure to add the new loader(s) before the "file" loader.
+// ** STOP ** Are you adding a new loader?
+// Make sure to add the new loader(s) before the "file" loader.
         ],
     },
     plugins: [
@@ -249,17 +307,25 @@ module.exports = {
     ],
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
-    node: {
-        dgram: 'empty',
-        fs: 'empty',
-        net: 'empty',
-        tls: 'empty',
-        child_process: 'empty',
-    },
-    // Turn off performance hints during development because we don't do any
-    // splitting or minification in interest of speed. These warnings become
-    // cumbersome.
+    node:
+        {
+            dgram: 'empty',
+            fs:
+                'empty',
+            net:
+                'empty',
+            tls:
+                'empty',
+            child_process:
+                'empty',
+        }
+    ,
+// Turn off performance hints during development because we don't do any
+// splitting or minification in interest of speed. These warnings become
+// cumbersome.
     performance: {
         hints: false,
-    },
-};
+    }
+    ,
+}
+;

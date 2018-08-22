@@ -1,5 +1,6 @@
 var config ={
     cdn:"", //cdn address
-    name:"my-app" //project name
+    name:"my-app", //project name
+    width: '' ,
 }
 module.exports = config
